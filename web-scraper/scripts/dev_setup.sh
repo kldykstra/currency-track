@@ -3,15 +3,18 @@
 # ------------------------------- Shell Setup -------------------------------
 
 # set the project root to one directory up
-export PROJECT_ROOT=$(dirname $(dirname $(realpath $0)))
+PROJECT_ROOT=$(dirname $(dirname $(realpath $0)))
+echo "Project root: $PROJECT_ROOT"
 
 # ------------------------------- Python Setup -------------------------------
 
 pyenv install 3.13.5
 pyenv local 3.13.5
 
-# Create a virtual environment
-uv venv $PROJECT_ROOT/.venv
+# Create a virtual environment if it exists and is empty
+if [ ! -d "$PROJECT_ROOT/.venv" ]; then
+    uv venv $PROJECT_ROOT/.venv
+fi
 
 # Activate the virtual environment
 source $PROJECT_ROOT/.venv/bin/activate
@@ -20,10 +23,6 @@ source $PROJECT_ROOT/.venv/bin/activate
 uv pip install -r $PROJECT_ROOT/requirements.txt
 
 # ------------------------------- AWS Setup -------------------------------
-export AWS_REGION=eu-north-1
-
-# Set the AWS profile
-export AWS_PROFILE=currencytrack-developer-400144345451
 
 # List s3 buckets and fetch currencytrack-development bucket name
 S3_BUCKET=$(aws s3 ls | grep currencytrack-development | awk '{print $3}')

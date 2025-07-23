@@ -10,13 +10,13 @@ export PROJECT_ROOT=$(dirname $(dirname $(realpath $0)))
 
 # ------------------------------- AWS Setup -------------------------------
 
-# List s3 buckets and fetch currencytrack-development bucket name
-S3_BUCKET=$(aws s3 ls | grep currencytrack-development | awk '{print $3}')
+# List s3 buckets and fetch currencytrack-production bucket name
+S3_BUCKET=$(aws s3 ls | grep currencytrack-production | awk '{print $3}')
 
 # If the bucket doesn't exist, create it
 if [ -z "$S3_BUCKET" ]; then
     s3uuiddev=$(uuidgen | tr -d - | tr '[:upper:]' '[:lower:]')
-    S3_BUCKET="currencytrack-development-$s3uuiddev"
+    S3_BUCKET="currencytrack-production-$s3uuiddev"
     aws s3api create-bucket \
         --bucket $S3_BUCKET \
         --region $AWS_REGION \

@@ -116,3 +116,6 @@ celerybeat-schedule
 
 # AWS Lambda build
 lambda.zip 
+
+# env
+.env
