@@ -1,0 +1,2 @@
+# DuckDB Python client
+duckdb==1.3.2

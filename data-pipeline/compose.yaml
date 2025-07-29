@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  duckdb:
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    container_name: currency-track-duckdb
+    ports:
+      - "8080:8080"
+    networks:
+      - currency-track-network
+    restart: no
+
+networks:
+  currency-track-network: {}
