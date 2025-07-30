@@ -8,9 +8,27 @@ services:
     container_name: currency-track-duckdb
     ports:
       - "8080:8080"
+    volumes:
+      - shared_data:/data
     networks:
       - currency-track-network
-    restart: no
+
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    container_name: currency-track-dashboard
+    ports:
+      - "3000:3000"
+    volumes:
+      - shared_data:/data
+      - grafana_storage:/var/lib/grafana
+    networks:
+      - currency-track-network
+
+volumes:
+  shared_data: {}
+  grafana_storage: {}
 
 networks:
   currency-track-network: {}
