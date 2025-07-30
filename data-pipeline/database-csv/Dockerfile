@@ -19,6 +19,8 @@ WORKDIR /app
 COPY requirements.txt .
 # Copy scripts directory
 COPY scripts/ /app/scripts/
+# Copy data file
+COPY eurofxref-hist.csv /data/eurofxref-hist.csv
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt

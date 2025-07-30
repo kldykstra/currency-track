@@ -12,9 +12,7 @@ echo "✓ DuckDB instance is ready"
 echo "✓ Data directory: /app/data"
 echo "✓ Container will stay running for 1 hour"
 
-# Create tables
-duckdb /app/data/currency_tracker.db < /app/scripts/create_tables.sql
-echo "✓ Tables created successfully"
-
-# Keep container running for 1 hour (3600 seconds)
-sleep 3600 
+# Start a Python HTTP server in /data
+cd /data
+echo "Starting HTTP server on port 8080..."
+exec python -m http.server 8080

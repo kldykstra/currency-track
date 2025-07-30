@@ -1,17 +1,21 @@
 version: '3.8'
 
 services:
-  duckdb:
+  postgresql:
     build:
-      context: ./database
+      context: ./database-postgresql
       dockerfile: Dockerfile
-    container_name: currency-track-duckdb
+    container_name: currency-track-postgresql
     ports:
-      - "8080:8080"
+      - "5432:5432"
     volumes:
-      - shared_data:/data
+      - pgdata:/var/lib/postgresql/data
     networks:
       - currency-track-network
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=currency_track
 
   dashboard:
     build:
@@ -21,14 +25,13 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - shared_data:/data
       - grafana_storage:/var/lib/grafana
     networks:
       - currency-track-network
 
 volumes:
-  shared_data: {}
   grafana_storage: {}
+  pgdata: {}
 
 networks:
   currency-track-network: {}
