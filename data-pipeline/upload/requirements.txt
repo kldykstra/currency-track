@@ -1,0 +1,12 @@
+# PostgreSQL connection
+psycopg2-binary
+
+# Data processing
+pandas
+numpy
+
+# HTTP client for API calls
+requests
+
+# Configuration
+python-dotenv

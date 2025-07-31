@@ -3,7 +3,7 @@ version: '3.8'
 services:
   postgresql:
     build:
-      context: ./database-postgresql
+      context: ./database
       dockerfile: Dockerfile
     container_name: currency-track-postgresql
     ports:
@@ -16,7 +16,15 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=currency_track
-
+  upload:
+    build:
+      context: ./upload
+      dockerfile: Dockerfile
+    container_name: currency-track-upload
+    networks:
+      - currency-track-network
+    depends_on:
+      - postgresql
   dashboard:
     build:
       context: ./dashboard
@@ -28,6 +36,9 @@ services:
       - grafana_storage:/var/lib/grafana
     networks:
       - currency-track-network
+    depends_on:
+      - postgresql
+      - upload
 
 volumes:
   grafana_storage: {}
