@@ -29,5 +29,9 @@ RUN useradd --create-home --shell /bin/bash appuser && \
 
 USER appuser
 
+# echo the env variables inside the container
+CMD ["echo", "POSTGRES_PASSWORD: $POSTGRES_PASSWORD"]
+
+
 # Default command
 CMD ["python", "app.py"] 

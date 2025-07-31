@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  postgresql:
+  postgres:
     build:
       context: ./database
       dockerfile: Dockerfile
@@ -12,10 +12,12 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - currency-track-network
+    env_file:
+      - .env
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=currency_track
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
   upload:
     build:
       context: ./upload
@@ -24,7 +26,13 @@ services:
     networks:
       - currency-track-network
     depends_on:
-      - postgresql
+      - postgres
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
   dashboard:
     build:
       context: ./dashboard
@@ -37,7 +45,7 @@ services:
     networks:
       - currency-track-network
     depends_on:
-      - postgresql
+      - postgres
       - upload
 
 volumes:
