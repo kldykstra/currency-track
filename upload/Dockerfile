@@ -20,18 +20,14 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
-COPY . .
+# Copy source code
+COPY src/* .
 
 # Create non-root user
 RUN useradd --create-home --shell /bin/bash appuser && \
     chown -R appuser:appuser /app
 
 USER appuser
-
-# echo the env variables inside the container
-CMD ["echo", "POSTGRES_PASSWORD: $POSTGRES_PASSWORD"]
-
 
 # Default command
 CMD ["python", "app.py"] 
