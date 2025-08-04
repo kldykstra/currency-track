@@ -1,11 +1,11 @@
 version: '3.8'
 
 services:
-  postgres:
+  database:
     build:
       context: ./database
       dockerfile: Dockerfile
-    container_name: currency-track-postgresql
+    container_name: currency-track-database
     ports:
       - "5432:5432"
     volumes:
@@ -26,7 +26,7 @@ services:
     networks:
       - currency-track-network
     depends_on:
-      - postgres
+      - database
     env_file:
       - .env
     environment:
@@ -45,7 +45,7 @@ services:
     networks:
       - currency-track-network
     depends_on:
-      - postgres
+      - database
       - upload
 
 volumes:

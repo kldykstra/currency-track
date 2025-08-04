@@ -1,15 +1,15 @@
-# Use Python 3.13 slim image
-FROM python:3.13-slim
+# Use Python 3.13-alpine image for minimal footprint
+FROM python:3.13-alpine
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk update && apk add --no-cache \
+    build-base \
+    postgresql-dev \
+    && rm -rf /var/cache/apk/*
 
 # Set working directory
 WORKDIR /app
@@ -24,9 +24,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/* .
 
 # Create non-root user
-RUN useradd --create-home --shell /bin/bash appuser && \
+RUN adduser -D -h /home/appuser appuser && \
     chown -R appuser:appuser /app
-
 USER appuser
 
 # Default command
