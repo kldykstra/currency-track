@@ -1,4 +1,8 @@
-FROM grafana/grafana-enterprise:12.1.0
+FROM grafana/grafana
+
+# Copy custom configuration
+COPY grafana.ini /etc/grafana/grafana.ini
+COPY provisioning /etc/grafana/provisioning
 
 EXPOSE 3000
 
