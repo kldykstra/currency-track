@@ -1,12 +1,20 @@
-FROM grafana/grafana
+FROM python:3.13-alpine
 
-# Copy custom configuration
-COPY grafana.ini /etc/grafana/grafana.ini
-COPY dashboards/ /var/lib/grafana/dashboards/
-COPY provisioning/ /etc/grafana/provisioning/
+# Set working directory
+WORKDIR /app
 
-EXPOSE 3000
+# Install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-ENV GF_LOG_LEVEL=debug
+# Copy Plotly Dash app code
+COPY . .
 
-CMD ["grafana-server", "web"]
+# Expose the port Plotly Dash will run on
+EXPOSE 8050
+
+# Set environment variables (optional)
+ENV DASH_DEBUG_MODE=false
+
+# Run the Plotly Dash app
+CMD ["python", "app.py"]
