@@ -6,8 +6,7 @@ from dash import dcc, html, Input, Output
 import numpy as np
 import plotly.express as px
 import pandas as pd
-import psycopg2
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 app = dash.Dash(__name__)
 
@@ -18,6 +17,19 @@ DB_USER = os.environ.get("POSTGRES_USER", "myuser")
 DB_PASS = os.environ.get("POSTGRES_PASSWORD", "mypassword")
 print(DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS)
 engine = create_engine(f'postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}')
+
+def get_currency_options():
+    query = """
+    SELECT DISTINCT currency_code
+    FROM conversion_rates
+    WHERE conversion_date >= CURRENT_DATE - INTERVAL '60 days'
+    """
+    # get query results as a list
+    with engine.connect() as connection:
+        raw_results = connection.execute(text(query))
+        results = [r[0] for r in raw_results.fetchall()]
+    currency_options = [{'label': currency, 'value': currency} for currency in sorted(results)]
+    return currency_options
 
 @app.callback(
     Output('chart', 'figure'),
@@ -44,12 +56,7 @@ def update_chart(selected_currencies):
 app.layout = html.Div([
     dcc.Dropdown(
         id='currency-dropdown',
-        options=[
-            {'label': 'USD', 'value': 'USD'},
-            {'label': 'EUR', 'value': 'EUR'},
-            {'label': 'GBP', 'value': 'GBP'},
-            {'label': 'JPY', 'value': 'JPY'}
-        ],
+        options=get_currency_options(),
         multi=True,
         placeholder='Select currencies'
     ),
