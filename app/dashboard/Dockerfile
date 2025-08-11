@@ -13,8 +13,9 @@ COPY . .
 # Expose the port Plotly Dash will run on
 EXPOSE 8050
 
-# Set environment variables (optional)
-ENV DASH_DEBUG_MODE=false
+# Set environment variables for development
+ENV FLASK_ENV=development
+ENV DASH_DEBUG_MODE=true
 
-# Run the Plotly Dash app
-CMD ["python", "app.py"]
+# Run the Plotly Dash app with the new organized structure
+CMD ["python", "-u", "app.py"]

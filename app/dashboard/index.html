@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Dashboard</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+        
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .iframe-wrapper {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            overflow: hidden;
+            height: 80vh;
+            min-height: 600px;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: white;
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .dashboard-container {
+                padding: 0 10px;
+                margin: 10px auto;
+            }
+            
+            .iframe-wrapper {
+                height: 70vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Currency Exchange Dashboard</h1>
+        <p>Real-time currency conversion rates and historical data visualization</p>
+    </div>
+    
+    <div class="dashboard-container">
+        <div class="iframe-wrapper">
+            <iframe 
+                src="http://currencytrack-analyze-prod-lb-1135160960.eu-north-1.elb.amazonaws.com/"
+                title="Currency Dashboard"
+                allowfullscreen>
+            </iframe>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>&copy; 2024 Currency Dashboard. Powered by Plotly Dash.</p>
+    </div>
+</body>
+</html> 

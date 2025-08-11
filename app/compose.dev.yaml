@@ -1,0 +1,77 @@
+services:
+  database:
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    container_name: currency-track-database-dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - currency-track-network
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_HOST=currency-track-database-dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+  upload:
+    build:
+      context: ./upload
+      dockerfile: Dockerfile
+    container_name: currency-track-upload-dev
+    networks:
+      - currency-track-network
+    depends_on:
+      database:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_HOST=currency-track-database-dev
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    container_name: currency-track-dashboard-dev
+    ports:
+      - "8050:8050"
+    volumes:
+      - ./dashboard:/app
+      - /app/__pycache__
+      - /app/.pytest_cache
+    networks:
+      - currency-track-network
+    depends_on:
+      database:
+        condition: service_healthy
+      upload:
+        condition: service_completed_successfully
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_HOST=currency-track-database-dev
+      - FLASK_ENV=development
+      - DASH_DEBUG_MODE=true
+    # Enable hot-reloading by restarting on file changes
+    restart: unless-stopped
+
+volumes:
+  pgdata: {}
+
+networks:
+  currency-track-network: {}

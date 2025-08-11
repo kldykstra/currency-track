@@ -47,6 +47,10 @@ services:
     container_name: currency-track-dashboard
     ports:
       - "8050:8050"
+    volumes:
+      - ./dashboard:/app
+      - /app/__pycache__
+      - /app/.pytest_cache
     networks:
       - currency-track-network
     depends_on:
@@ -61,6 +65,8 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_HOST=currency-track-database
+      - FLASK_ENV=development
+      - DASH_DEBUG_MODE=true
 
 volumes:
   pgdata: {}

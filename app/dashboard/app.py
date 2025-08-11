@@ -1,101 +1,54 @@
-import os
-import time
-from datetime import datetime, timedelta
-
 import dash
-from dash import dcc, html, Input, Output
-import numpy as np
-import plotly.express as px
-import pandas as pd
-from sqlalchemy import create_engine, text
-from sqlalchemy.exc import OperationalError
+from dash import dcc, html
 
-app = dash.Dash(__name__)
+# Import our modular components
+from config.settings import Config
+from database.db_manager import DatabaseManager
+from layouts.main_layout import create_main_layout
+from callbacks.chart_callbacks import register_chart_callbacks
 
-# Use Docker service name for database connection
-DB_HOST = os.environ.get("POSTGRES_HOST", "currency-track-database")
-DB_PORT = os.environ.get("POSTGRES_PORT", "5432")
-DB_NAME = os.environ.get("POSTGRES_DB", "currency_tracker")
-DB_USER = os.environ.get("POSTGRES_USER", "postgres")
-DB_PASS = os.environ.get("POSTGRES_PASSWORD", "password")
-print(f"Connecting to database: {DB_HOST}:{DB_PORT}/{DB_NAME}")
-
-# Create engine with retry logic
-def create_db_engine():
-    return create_engine(f'postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}')
-
-engine = create_db_engine()
-
-def wait_for_database(max_retries=30, delay=2):
-    """Wait for database to be ready"""
-    for attempt in range(max_retries):
-        try:
-            with engine.connect() as connection:
-                connection.execute(text("SELECT 1"))
-                print("Database connection successful!")
-                return True
-        except OperationalError as e:
-            print(f"Database not ready (attempt {attempt + 1}/{max_retries}): {e}")
-            if attempt < max_retries - 1:
-                time.sleep(delay)
-            else:
-                print("Failed to connect to database after all retries")
-                return False
-    return False
-
-# Wait for database on startup
-if not wait_for_database():
-    print("Warning: Database connection failed, app may not work properly")
-
-def get_currency_options():
-    try:
-        query = """
-        SELECT DISTINCT currency_code
-        FROM conversion_rates
-        WHERE conversion_date >= CURRENT_DATE - INTERVAL '60 days'
-        """
-        # get query results as a list
-        with engine.connect() as connection:
-            raw_results = connection.execute(text(query))
-            results = [r[0] for r in raw_results.fetchall()]
-        currency_options = [{'label': currency, 'value': currency} for currency in sorted(results)]
-        print(f"Found {len(currency_options)} currency options")
-        return currency_options
-    except Exception as e:
-        print(f"Error connecting to database: {e}")
-        return []
-
-@app.callback(
-    Output('chart', 'figure'),
-    Input('currency-dropdown', 'value')
-)
-def update_chart(selected_currencies):
-    if not selected_currencies:
-        return px.line(title='Select currencies')
+def create_app(config):
+    """Create and configure the Dash application"""
     
-    # Handle multiple selections
-    currencies = "', '".join(selected_currencies)
-    query = f"""
-    SELECT conversion_date, currency_code, conversion_rate 
-    FROM conversion_rates 
-    WHERE currency_code IN ('{currencies}')
-    ORDER BY conversion_date
-    """
-    df = pd.read_sql(query, engine)
+    # Initialize the app
+    app = dash.Dash(
+        __name__, 
+        suppress_callback_exceptions=True,
+        title="Currency Tracker Dashboard"
+    )
     
-    fig = px.line(df, x='conversion_date', y='conversion_rate', color='currency_code', 
-                  title='Multiple Currency Comparison')
-    return fig
+    # Initialize database manager
+    db_manager = DatabaseManager()
+    
+    # Wait for database to be ready
+    if not db_manager.wait_for_database():
+        print("Warning: Database connection failed, app may not work properly")
+    
+    # Set the layout
+    app.layout = create_main_layout()
+    
+    # Register chart callbacks only
+    engine = db_manager.get_engine()
+    register_chart_callbacks(app, engine)
+    
+    return app
 
-app.layout = html.Div([
-    dcc.Dropdown(
-        id='currency-dropdown',
-        options=get_currency_options(),
-        multi=True,
-        placeholder='Select currencies'
-    ),
-    dcc.Graph(id='chart')
-])
+def main():
+    """Main entry point for the application"""
 
+    # Initialize the config
+    config = Config()
+
+    app = create_app(config)
+    
+    # Run the app
+    app.run(
+        debug=config.DEBUG_MODE,
+        host=config.HOST,
+        port=config.PORT,
+        dev_tools_hot_reload=config.DEBUG_MODE,
+        dev_tools_ui=config.DEBUG_MODE
+    )
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8050)
+    main()
+
