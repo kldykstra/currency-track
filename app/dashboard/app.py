@@ -14,7 +14,8 @@ def create_app(config):
     app = dash.Dash(
         __name__, 
         suppress_callback_exceptions=True,
-        title="Currency Tracker Dashboard"
+        title="Currency Tracker Dashboard",
+        external_stylesheets=["https://cdn.jsdelivr.net/npm/bootswatch@5.3.7/dist/flatly/bootstrap.min.css"]
     )
     
     # Initialize database manager

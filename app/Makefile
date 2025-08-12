@@ -10,9 +10,7 @@ deploy:
 
 # Run locally for development
 dev:
-	@echo "Starting containers for local development..."
-	docker-compose -f compose.dev.yaml up -d --build
-	@echo "Containers started."
+	@./dev.sh
 
 # Stop and remove containers
 down:

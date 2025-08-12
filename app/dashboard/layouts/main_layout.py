@@ -33,40 +33,36 @@ def create_main_layout():
     """Create the main layout for the dashboard"""
     # Get currency options once when creating layout
     currency_options = get_currency_options()
+
+    """Generate a button for each date range option"""
+    buttons = []
+    for i, (days, label) in enumerate(Config.DATE_RANGE_OPTIONS):
+        buttons.append(html.Button(label, id=f'btn{i+1}', n_clicks=0, style={'marginRight': '10px'}, className='btn btn-primary'))
     
     return html.Div([
         # Header
         html.H1('Euro Conversion Rates', style={'textAlign': 'center'}),
         
-        # Description
-        html.P('Select currencies to compare their conversion rates to EUR'),
-        
         # Controls section
         html.Div([
-            # Date range dropdown
-            html.Div([
-                html.Label('Date Range:', style={'fontWeight': 'bold'}),
-                dcc.Dropdown(
-                    id='date-range-dropdown',
-                    options=Config.DATE_RANGE_OPTIONS,
-                    placeholder='Select date range',
-                    style={'width': '100%'}
-                )
-            ], style={'width': '25%', 'display': 'inline-block', 'marginRight': '20px'}),
-            
             # Currency dropdown
             html.Div([
                 html.Label('Currencies:', style={'fontWeight': 'bold'}),
                 dcc.Dropdown(
                     id='currency-dropdown',
                     options=currency_options,  # Static options from database
-                    value=['USD'],
+                    value=[Config.DEFAULT_CURRENCY],
                     multi=True,
                     placeholder='Select currencies',
                     style={'width': '100%'}
                 )
-            ], style={'width': '50%', 'display': 'inline-block'})
+            ], style={'width': '50%', 'display': 'inline-block', 'marginLeft': '60px'})
         ], style={'marginBottom': '20px'}),
+        # Date range buttons
+        html.Div([
+            *buttons,
+        ], style={'width': '50%', 'display': 'inline-block', 'marginLeft': '60px'}),
+        dcc.Store(id='date-range-filter'),
         
         # Chart
         dcc.Graph(id='chart')
