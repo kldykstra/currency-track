@@ -15,7 +15,10 @@ def create_app(config):
         __name__, 
         suppress_callback_exceptions=True,
         title="Currency Tracker Dashboard",
-        external_stylesheets=["https://cdn.jsdelivr.net/npm/bootswatch@5.3.7/dist/flatly/bootstrap.min.css"]
+        external_stylesheets=[
+            "https://cdn.jsdelivr.net/npm/bootswatch@5.3.7/dist/flatly/bootstrap.min.css"
+            ,"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+        ]
     )
     
     # Initialize database manager
