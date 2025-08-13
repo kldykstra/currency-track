@@ -10,6 +10,11 @@ if [ -f .env ]; then
     source .env
 fi
 
+# Remove the old images
+docker rmi currency-track-upload:latest
+docker rmi currency-track-database:latest
+docker rmi currency-track-dashboard:latest
+
 # Build the image locally for AMD64
 echo "Building Docker images locally..."
 docker buildx build --no-cache --platform linux/amd64 -t currency-track-upload:latest ./upload
@@ -22,6 +27,10 @@ docker save currency-track-database:latest -o database.tar
 docker save currency-track-dashboard:latest -o dashboard.tar
 
 echo "Deploying to EC2..."
+
+# Remove remote directory
+echo "Removing remote directory..."
+ssh -i "$SSH_KEY_PATH" "$REMOTE_USER@$REMOTE_HOST" "rm -rf $REMOTE_DIR"
 
 # Create remote directory
 echo "Creating remote directory..."
@@ -54,11 +63,13 @@ scp -i "$SSH_KEY_PATH" compose.yaml .env upload.tar database.tar dashboard.tar "
 echo "Loading and running application..."
 ssh -i "$SSH_KEY_PATH" "$REMOTE_USER@$REMOTE_HOST" "
     cd $REMOTE_DIR
+    echo 'y' | docker system prune -a
+    echo 'y' | docker volume prune -a
     docker-compose down
     docker load -i upload.tar
     docker load -i database.tar
     docker load -i dashboard.tar
-    docker-compose up -d
+    docker-compose -f compose.yaml up -d
     docker-compose ps
 "
 

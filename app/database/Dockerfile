@@ -6,7 +6,4 @@ COPY init.sql /docker-entrypoint-initdb.d/
 
 EXPOSE 5432
 
-# echo the env variables inside the container
-CMD ["echo", "POSTGRES_PASSWORD: $POSTGRES_PASSWORD"]
-
 CMD ["postgres"]

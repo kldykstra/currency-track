@@ -5,14 +5,17 @@ WORKDIR /app
 
 # Install dependencies
 COPY requirements.txt .
-
-RUN pip install --no-cache-dir -r requirements.txt
-
 # Copy Plotly Dash app code
 COPY . .
+
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Expose the port Plotly Dash will run on
 EXPOSE 8050
 
-# Run the Plotly Dash app
+# Set environment variables for development
+ENV FLASK_ENV=development
+ENV DASH_DEBUG_MODE=true
+
+# Run the Plotly Dash app with the new organized structure
 CMD ["python", "-u", "app.py"]
