@@ -5,8 +5,8 @@ from database.db_manager import DatabaseManager
 from sqlalchemy import text
 
 INFO_HEADER = 'Source: European Central Bank'
-INFO_TEXT = 'Conversion rate data as provided by the European Central Bank (ECB).' + \
-'Historical time periods are relative to the latest available data.'
+INFO_TEXT = 'Conversion rate data as provided by the European Central Bank (ECB). ' + \
+'Historical time periods are relative to the latest published date.'
 
 def get_currency_options():
     """Get currency options directly from database"""
@@ -79,7 +79,7 @@ def create_main_layout():
             )
         ], style={'backgroundColor': 'var(--bs-primary)'}),
         
-        # Controls section
+        # Currency selection section
         html.Div([
             # Currency dropdown
             html.Div([
@@ -103,12 +103,16 @@ def create_main_layout():
                     style={'display': 'inline-block', 'verticalAlign': 'middle'}
                 )
             ], style={'marginLeft': '60px', 'marginBottom': '20px'}),
-        # Date range buttons
+        ]),
+        dbc.Container([
+            html.H4("Scorecards"),
+            html.Div(id="scorecards-container", style={"display": "flex", "flexWrap": "wrap"})
+        ]),
+        # Date range selection section
         html.Div([
             *buttons,
+            dcc.Store(id='date-range-filter')
         ], style={'width': '50%', 'display': 'inline-block', 'marginLeft': '60px'}),
-        dcc.Store(id='date-range-filter'),
-        ]),
         
         # Chart
         dcc.Graph(id='chart')
