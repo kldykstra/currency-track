@@ -8,20 +8,35 @@ from sqlalchemy import text
 def register_chart_callbacks(app, engine):
     """Register all chart-related callbacks"""
 
-    buttons = [f'btn{i+1}' for i in range(len(Config.DATE_RANGE_OPTIONS))]
-    button_inputs = [Input(button, 'n_clicks') for button in buttons]
+    # Find the default days value (30 days)
+    DEFAULT_DAYS = 30
 
     """Update date range filter depending on which button is clicked"""
     @app.callback(
-        Output('date-range-filter', 'data'),
-        *button_inputs
+        [Output('date-range-filter', 'data'),
+         Output('current-selection', 'data')],
+        [Input(f'btn-{days}', 'n_clicks') for days, _ in Config.DATE_RANGE_OPTIONS]
     )
     def update_date_range(*n_clicks):
         if ctx.triggered_id is not None:
-            for i, button in enumerate(buttons):
-                if ctx.triggered_id == button:
-                    return Config.DATE_RANGE_OPTIONS[i][0]
-        return Config.DATE_RANGE_OPTIONS[-1][0]
+            # Extract the days value from the button ID (e.g., 'btn-30' -> 30)
+            days = int(ctx.triggered_id.split('-')[1])
+            return days, days
+        return DEFAULT_DAYS, DEFAULT_DAYS
+
+    """Update button styles depending on which button is clicked"""
+    @app.callback(
+        [Output(f'btn-{days}', 'className') for days, _ in Config.DATE_RANGE_OPTIONS],
+        Input('current-selection', 'data')
+    )
+    def update_button_styles(selected_value):
+        button_classes = []
+        for days, _ in Config.DATE_RANGE_OPTIONS:
+            if days == selected_value:
+                button_classes.append('btn btn-primary')
+            else:
+                button_classes.append('btn btn-light')
+        return button_classes
 
     """Populate the scorecards given selected currencies"""
     @app.callback(
@@ -49,6 +64,21 @@ def register_chart_callbacks(app, engine):
             return html.Div([html.H4("Error loading scorecards")])
 
         for currency in selected_currencies:
+
+            # Enclose each card (currency and its scorecards) in an outline box with rounded corners
+            card_children = [
+                html.H3(f"{currency}", 
+                    style={
+                        'display': 'inline-block',
+                        'vertical-align': 'center',
+                        'padding': '10px',
+                        'margin': '10px',
+                        'font-weight': 'bold',
+                        'position': 'relative',
+                        'top': '-8px'
+                    })
+            ]
+
             df_currency = df[df['currency_code'] == currency]
 
             latest_date = df_currency['conversion_date'].max()
@@ -71,11 +101,38 @@ def register_chart_callbacks(app, engine):
                     score_text = '\u2193'
                 else:
                     score_color = 'black'
+                    score_text = ''
 
-                cards.append(html.Div([
-                    html.H5(f"{currency} - {period_name}"),
-                    html.H5(f"{score_text}{abs(score):.2f}%", style={'color': score_color})
-                ]))
+                card_children.append(
+                    html.Div([
+                        html.H5(f"{period_name}"),
+                        html.H5(f"{score_text}{abs(score):.2f}%", style={'color': score_color})
+                    ], style={
+                        'display': 'inline-block',
+                        'width': '100px',
+                        'text-align': 'center',
+                        'border': '0px solid black',
+                        'padding': '10px',
+                        'margin': '10px',
+                        'border-radius': '8px',
+                        'background': '#f8f9fa'
+                    })
+                )
+            # Wrap the card_children in a shadow box with rounded corners
+            cards.append(
+                html.Div(
+                    card_children,
+                    style={
+                        'border-radius': '12px',
+                        'padding': '20px',
+                        'margin': '15px',
+                        'display': 'inline-block',
+                        'vertical-align': 'top',
+                        'background': '#f5f7fa',
+                        'box-shadow': '0 2px 8px rgba(0,0,0,0.04)'
+                    }
+                )
+            )
         return cards
 
 
@@ -108,6 +165,25 @@ def register_chart_callbacks(app, engine):
                 return px.line(title='No data available for selected criteria')
             
             fig = px.line(df, x='conversion_date', y='conversion_rate', color='currency_code')
+
+            # Add a title to the chart
+            fig.update_layout(title=f"Conversion Rate from Eur to Selected Currencies (Higher value = stronger Euro)")
+            # Add an info icon popover to the title
+            fig.update_layout(
+                title_x=0.5,
+                title_y=0.95,
+                title_font_size=20,
+                title_font_color='#2c3e50',
+                title_font_family='Lato, "Helvetica Neue", Arial, Helvetica, sans-serif'
+            )
+            # Add a tooltip to the chart
+            fig.update_layout(
+                hovermode='x unified',
+                hoverlabel=dict(bgcolor='white', font_size=12, font_family='Lato, "Helvetica Neue", Arial, Helvetica, sans-serif'),
+                hoverlabel_bgcolor='white',
+                hoverlabel_font_size=12,
+                hoverlabel_font_family='Lato, "Helvetica Neue", Arial, Helvetica, sans-serif'
+            )
             
             # Update the axis labels
             fig.update_xaxes(title_text='Date')
