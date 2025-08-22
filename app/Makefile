@@ -1,6 +1,6 @@
 # Currency Track Project Makefile
 
-.PHONY: deploy dev
+.PHONY: deploy dev down
 
 # Deploy with the deploy.sh script
 deploy:

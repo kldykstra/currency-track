@@ -77,4 +77,11 @@ ssh -i "$SSH_KEY_PATH" "$REMOTE_USER@$REMOTE_HOST" "
 echo "Cleaning up..."
 rm upload.tar database.tar dashboard.tar
 
-echo "Deployment complete!"
+echo "Deployment complete! Setting up cron job..."
+
+ssh -i "$SSH_KEY_PATH" "$REMOTE_USER@$REMOTE_HOST" "
+    cd $REMOTE_DIR
+    echo '0 22 * * 1-5 cd $REMOTE_DIR && docker-compose up -d upload' | crontab -
+"
+
+echo "Cron job setup complete!"

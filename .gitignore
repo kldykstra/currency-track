@@ -119,3 +119,6 @@ lambda.zip
 
 # env
 .env
+
+# pem keys
+*.pem
